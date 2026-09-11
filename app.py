@@ -1,73 +1,40 @@
 import os
-import mlflow
+import pickle
 import pandas as pd
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
 # ============================================================
-# MLflow Configuration
+# Load CHD Model
 # ============================================================
 
-MLFLOW_TRACKING_URI = os.getenv(
-    "MLFLOW_TRACKING_URI",
-    "https://avramlops.onrender.com"
-)
-
-mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-
-print("MLflow Tracking URI:", MLFLOW_TRACKING_URI)
-
-
-# ============================================================
-# Model Configuration
-# ============================================================
-
-MODEL_NAME = os.getenv(
-    "MODEL_NAME",
-    "logistic"
-)
-
-MODEL_VERSION = os.getenv(
-    "MODEL_VERSION",
-    "1"
-)
-
-print("Model Name:", MODEL_NAME)
-print("Model Version:", MODEL_VERSION)
-
-
-# ============================================================
-# Load Model from MLflow
-# ============================================================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "chd.pickle")
 
 try:
+    with open(MODEL_PATH, "rb") as file:
+        app.model = pickle.load(file)
 
-    app.model = mlflow.pyfunc.load_model(
-        model_uri=f"models:/{MODEL_NAME}/{MODEL_VERSION}"
-    )
-
-    print("Model loaded successfully!")
+    print("CHD model loaded successfully!")
+    print("Model path:", MODEL_PATH)
 
 except Exception as e:
-
-    print("ERROR: Could not load MLflow model")
-    print("Error:", str(e))
-
     app.model = None
+    print("ERROR: Could not load CHD model")
+    print("Error:", str(e))
 
 
 # ============================================================
 # Home Route
 # ============================================================
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
 
     return jsonify({
-        "message": "ML Model Server is running",
-        "model": MODEL_NAME,
-        "version": MODEL_VERSION,
+        "message": "CHD ML Model API is running",
+        "model": "chd.pickle",
         "model_status": (
             "loaded"
             if app.model is not None
@@ -84,30 +51,27 @@ def home():
 def predict():
 
     if app.model is None:
-
         return jsonify({
-            "error": "Model is not loaded"
+            "error": "CHD model is not loaded"
         }), 500
 
     data = request.get_json()
 
     if not data:
-
         return jsonify({
             "error": "No JSON data provided"
         }), 400
 
     try:
 
-        # Convert input JSON to DataFrame
+        # Convert JSON input to DataFrame
         data_df = pd.DataFrame([data])
 
-        # Generate prediction
+        # Prediction
         prediction = app.model.predict(data_df)
 
         return jsonify({
-            "model": MODEL_NAME,
-            "version": MODEL_VERSION,
+            "model": "chd.pickle",
             "prediction": prediction.tolist()
         })
 
@@ -119,7 +83,7 @@ def predict():
 
 
 # ============================================================
-# Run Flask Application
+# Run Flask
 # ============================================================
 
 if __name__ == "__main__":
