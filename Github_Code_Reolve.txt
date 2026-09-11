@@ -1,0 +1,22 @@
+Username - avraghosh
+Password - *MAp43aipE93_9y
+
+mlflow server --host 127.0.0.1 --port 8080 --backend-store-uri sqlite:///mlflow.db --default-artifact-root file:///C:/Users/avrae/OneDrive/Desktop/Desktop/MLOps/mlruns
+
+git config --global user.name "avraece"
+
+git config --global user.email "avra.ece@gmail.com"
+
+https://github.com/avraece/MLOps
+
+git remote add origin https://github.com/avraece/MLOps.git
+
+git remote -v
+
+git pull origin main --allow-unrelated-histories
+ 
+git checkout --ours README.md app.py requirements.txt
+ 
+git add README.md app.py requirements.txt
+ 
+git status

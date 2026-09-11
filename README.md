@@ -14,9 +14,9 @@ This workspace contains the ML training, MLflow tracking, and Flask inference ex
    mlflow server --host 127.0.0.1 --port 8080 --backend-store-uri sqlite:///mlflow.db --default-artifact-root file:///C:/Users/avrae/OneDrive/Desktop/Desktop/MLOps/mlruns
 
 4. Run the notebooks in order:
-   - Chapter_12_MLOps.ipynb
-   - Chapter_12_MLServer.ipynb
-   - Chapter_12_MLClient.ipynb
+   - MLOps.ipynb
+   - MLServer.ipynb
+   - MLClient.ipynb
 
 ## Notes
 
