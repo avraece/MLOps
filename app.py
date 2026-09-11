@@ -1,9 +1,11 @@
 import os
 import pickle
+import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
+
 
 # ============================================================
 # Load CHD Model
@@ -33,7 +35,7 @@ except Exception as e:
 def home():
 
     return jsonify({
-        "message": "CHD ML Model API is running",
+        "message": "CHD Prediction API is running",
         "model": "chd.pickle",
         "model_status": (
             "loaded"
@@ -50,32 +52,52 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
 
-    if app.model is None:
-        return jsonify({
-            "error": "CHD model is not loaded"
-        }), 500
-
-    data = request.get_json()
-
-    if not data:
-        return jsonify({
-            "error": "No JSON data provided"
-        }), 400
-
     try:
 
-        # Convert JSON input to DataFrame
-        data_df = pd.DataFrame([data])
+        # Check whether model is loaded
+        if app.model is None:
+            return jsonify({
+                "error": "CHD model is not loaded"
+            }), 500
 
-        # Prediction
-        prediction = app.model.predict(data_df)
+        # Get JSON input
+        data = request.get_json(force=True)
+
+        if data is None:
+            return jsonify({
+                "error": "No JSON body received"
+            }), 400
+
+        print("Received data:", data)
+
+        # Convert JSON to DataFrame
+        chd_df = pd.DataFrame([data])
+
+        print("Input DataFrame:")
+        print(chd_df)
+
+        # ====================================================
+        # Predict CHD Probability
+        # ====================================================
+
+        pred_prob = app.model.predict_proba(chd_df)[0][1]
+
+        # Round probability to 2 decimal places
+        pred_prob = float(np.round(pred_prob, 2))
+
+        print(f"Predicted probability of CHD: {pred_prob}")
+
+        # ====================================================
+        # Return Prediction
+        # ====================================================
 
         return jsonify({
-            "model": "chd.pickle",
-            "prediction": prediction.tolist()
+            "probability_of_CHD": pred_prob
         })
 
     except Exception as e:
+
+        print("Error during prediction:", str(e))
 
         return jsonify({
             "error": str(e)
