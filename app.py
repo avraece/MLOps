@@ -14,7 +14,7 @@ CORS(app)
 # ============================================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "chd.pickle")
+MODEL_PATH = os.path.join(BASE_DIR, "ch_rf.pickle")
 
 try:
 
@@ -47,7 +47,7 @@ def home():
 
     return jsonify({
         "message": "CHD Prediction API is running",
-        "model": "chd.pickle",
+        "model": "ch_rf.pickle",
         "model_status": (
             "loaded"
             if app.model is not None
